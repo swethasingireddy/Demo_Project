@@ -1,0 +1,95 @@
+@model List<CourseFeedback.Models.Feedback>
+@{
+    ViewData["Title"] = "Analytics";
+    var courseLabels = Model.Select(f => f.Course).Distinct().ToList();
+    var avgRatings = courseLabels.Select(course =>
+        Model.Where(f => f.Course == course).Average(f => f.Rating)).ToList();
+
+    var ratingCounts = Enumerable.Range(1, 5)
+        .Select(r => Model.Count(f => f.Rating == r)).ToList();
+
+    var semesterLabels = Model.Select(f => f.Semester).Distinct().ToList();
+    var semesterAvgRatings = semesterLabels.Select(sem =>
+        Model.Where(f => f.Semester == sem).Average(f => f.Rating)).ToList();
+}
+
+<h2 class="mb-4">Feedback Analytics</h2>
+
+<div class="row">
+  <div class="col-md-6 mb-4">
+    <div class="card p-3 shadow">
+      <h4>Average Rating by Course</h4>
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-6 mb-4">
+    <div class="card p-3 shadow">
+      <h4>Rating Distribution</h4>
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <div class="card p-3 shadow">
+      <h4>Rating Trend by Semester</h4>
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Bar Chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(courseLabels)),
+        datasets: [{
+          label: 'Average Rating',
+          data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(avgRatings)),
+          backgroundColor: 'rgba(54, 162, 235, 0.6)'
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true, max: 5 } }
+      }
+    });
+
+    // Pie Chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+        datasets: [{
+          data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ratingCounts)),
+          backgroundColor: [
+            '#ff4c4c', '#ffa500', '#ffd700', '#90ee90', '#1e90ff'
+          ]
+        }]
+      }
+    });
+
+    // Line Chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(semesterLabels)),
+        datasets: [{
+          label: 'Average Rating per Semester',
+          data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(semesterAvgRatings)),
+          fill: false,
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: { y: { beginAtZero: true, max: 5 } }
+      }
+    });
+  </script>
+}

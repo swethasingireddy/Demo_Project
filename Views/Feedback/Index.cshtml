@@ -1,0 +1,33 @@
+@model List<CourseFeedback.Models.Feedback>
+@{
+    ViewData["Title"] = "All Feedback";
+}
+<h2 class="mb-4">All Feedback</h2>
+<a class="btn btn-success mb-3" href="/Feedback/Create">+ Submit New Feedback</a>
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Rating</th>
+            <th>Comment</th>
+            <th>Semester</th>
+            <th>Instructor</th>
+            <th>Anonymous?</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var f in Model)
+    {
+        <tr>
+            <td>@f.StudentName</td>
+            <td>@f.Course</td>
+            <td>@f.Rating</td>
+            <td>@f.Comment</td>
+            <td>@f.Semester</td>
+            <td>@f.Instructor</td>
+            <td>@(f.IsAnonymous ? "Yes" : "No")</td>
+        </tr>
+    }
+    </tbody>
+</table>
